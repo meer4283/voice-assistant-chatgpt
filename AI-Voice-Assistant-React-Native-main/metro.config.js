@@ -5,6 +5,7 @@
  * @format
  */
 
+
 module.exports = {
   transformer: {
     getTransformOptions: async () => ({
@@ -13,5 +14,11 @@ module.exports = {
         inlineRequires: true,
       },
     }),
+  },
+  resolver: {
+    /* ... other resolver config options ... */
+    extraNodeModules: {
+      '@react-native-community/cli': 'C:\Users\MEER\AppData\Roaming\npm\node_modules\@react-native-community\cli',
+    },
   },
 };

@@ -48,6 +48,8 @@ const App = () => {
   };
 
   const getAnswer = text => {
+    if (text.trim().length > 0) {
+
     setLoading(true);
     let newMessages = [...messages];
     newMessages.push({role: 'user', content: text.trim()});
@@ -62,7 +64,9 @@ const App = () => {
       console.log('got api data');
       setLoading(false);
       if (res.success) {
-        setMessages([...newMessages,...res.data]);
+        setMessages([...res.data]);
+
+
         setResult('');
         updateScrollView();
 
@@ -71,7 +75,10 @@ const App = () => {
       } else {
         Alert.alert('Error', res.msg);
       }
+    }).finally(()=>{
+
     });
+  }
   };
 
   const speechErrorHandler = e => {
