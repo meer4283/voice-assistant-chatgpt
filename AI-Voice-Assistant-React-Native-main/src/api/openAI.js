@@ -11,7 +11,8 @@ const chatgptUrl = 'https://api.openai.com/v1/chat/completions';
 const dalleUrl = 'https://api.openai.com/v1/images/generations';
 
 export const apiCall = async (prompt, messages)=>{
-    
+    console.log("Hit Api");
+
     // // Logic 1 : this will check the prompt from chatgpt if user wants to create an image
     try{
         const res = await client.post(chatgptUrl, {
@@ -86,4 +87,25 @@ const dalleApiCall = async (prompt, messages)=>{
         console.log('error: ',err);
         return Promise.resolve({success: false, msg: err.message});
     }
+}
+
+export const customChatGpt = async (currentTranscript) =>{
+  return await  axios
+    .post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: currentTranscript },
+        ],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer '+apiKey,
+        },
+      }
+    )
+    
 }
