@@ -21,7 +21,7 @@ DerivedData
 *.ipa
 *.xcuserstate
 ios/.xcode.env.local
-src/constants/index.js
+src/constants/
 # Android/IntelliJ
 #
 build/
