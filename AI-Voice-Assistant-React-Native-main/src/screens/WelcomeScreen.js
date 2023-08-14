@@ -2,6 +2,7 @@ import { View, Text, SafeAreaView, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import LottieView from 'lottie-react-native';
 
 export default function WelcomeScreen() {
     const navigation = useNavigation();
@@ -9,8 +10,12 @@ export default function WelcomeScreen() {
     <SafeAreaView className="flex-1 flex justify-around bg-white">
         {/* title */}
         <View className="space-y-2">
+      
+        
+
             <Text style={{fontSize: wp(10)}} className="text-center font-bold text-gray-700">
                 Jarvis
+
             </Text>
             <Text style={{fontSize: wp(4)}} className="text-center tracking-wider font-semibold text-gray-600">
                 The future is here, powerd by AI.
@@ -23,6 +28,9 @@ export default function WelcomeScreen() {
                 source={require('../../assets/images/welcome.png')}
                 style={{height: wp(75), width: wp(75)}}
             />
+
+<LottieView   style={{height: wp(75), width: wp(75)}} source={require("../../assets/images/bot.json")} autoPlay loop />
+
         </View>
         
         {/* start button */}
