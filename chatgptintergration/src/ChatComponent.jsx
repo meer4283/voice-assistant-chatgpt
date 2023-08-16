@@ -103,9 +103,9 @@ const ChatComponent = () => {
   } = useSpeechRecognition();
   const startListening = () => SpeechRecognition.startListening({ continuous: true });
 
-  if (!browserSupportsSpeechRecognition) {
-    return <span>Browser doesn't support speech recognition.</span>;
-  }
+  // if (!browserSupportsSpeechRecognition) {
+  //   return <span>Browser doesn't support speech recognition.</span>;
+  // }
 
 
   // useEffect(() => {
