@@ -21,10 +21,18 @@ import bot from '../../assets/images/bot.json';
 import LinearGradient from 'react-native-linear-gradient';
 import {customChatGpt} from '../api/openAI';
 const App = () => {
+  const useRefState = initialValue => {
+    const [state, setState] = useState(initialValue);
+    const stateRef = useRef(state);
+    useEffect(() => {
+      stateRef.current = state;
+    }, [state]);
+    return [state, stateRef, setState];
+  };
   const [result, setResult] = useState('');
   const [recording, setRecording] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState([
+  const [messages, messagesCurrent, setMessages] = useRefState([
     {
       role: 'assistant',
       content: 'Hello ! this is micheal how may i help you ?',
@@ -49,36 +57,38 @@ const App = () => {
 
   const getAnswer = text => {
     if (text.trim().length > 0) {
+      setLoading(true);
+      console.log('messagesCurrent', messagesCurrent);
+      console.log('Old messages', messages);
+      let newMessages = [...messagesCurrent.current];
+      newMessages.push({role: 'user', content: text.trim()});
+      setMessages([...newMessages]);
 
-    setLoading(true);
-    let newMessages = [...messages];
-    newMessages.push({role: 'user', content: text.trim()});
-    setMessages([...newMessages]);
-
-    // scroll to the bottom of the view
-    updateScrollView();
-    console.log('got api data');
-
-    // fetching response from chatGPT with our prompt and old messages
-    apiCall(text.trim(), newMessages).then(res => {
+      // scroll to the bottom of the view
+      updateScrollView();
       console.log('got api data');
-      setLoading(false);
-      if (res.success) {
-        setMessages([...res.data]);
 
+      // fetching response from chatGPT with our prompt and old messages
+      apiCall(text.trim(), newMessages)
+        .then(res => {
+          console.log('got api data');
+          setLoading(false);
+          if (res.success) {
+            newMessages.push(res.data);
+            setMessages([...newMessages]);
 
-        setResult('');
-        updateScrollView();
+            setResult('');
+            updateScrollView();
 
-        // now play the response to user
-        startTextToSpeach(res.data[res.data.length - 1]);
-      } else {
-        Alert.alert('Error', res.msg);
-      }
-    }).finally(()=>{
-
-    });
-  }
+            // now play the response to user
+            startTextToSpeach(res.data?.content);
+          } else {
+            Alert.alert('Error', res.msg);
+          }
+        })
+        .finally(() => {});
+      setMessages([...newMessages]);
+    }
   };
 
   const speechErrorHandler = e => {
@@ -147,10 +157,10 @@ const App = () => {
   };
 
   const startTextToSpeach = message => {
-    if (!message.content.includes('https')) {
+    if (!message.includes('https')) {
       setSpeaking(true);
       // playing response with the voice id and voice speed
-      Tts.speak(message.content, {
+      Tts.speak(message, {
         iosVoiceId: 'com.apple.ttsbundle.Samantha-compact',
         rate: 0.5,
       });
@@ -229,10 +239,13 @@ const App = () => {
 
           <ScrollView>
             {messages.length > 0 ? (
-              <View className="space-y-2 flex-1">
+              <View className="space-y-2 flex-2">
                 <View
-                  style={{height: hp(58)}}
-                  className="  bg-neutral-200 rounded-3xl p-4">
+                  style={{
+                    height: hp(70),
+                    backgroundColor: 'rgba(61, 61, 61, 0.56)',
+                  }}
+                  className="   rounded-3xl p-4">
                   <ScrollView
                     ref={scrollViewRef}
                     bounces={false}
@@ -245,8 +258,9 @@ const App = () => {
                           return (
                             <View
                               key={index}
+                              style={{backgroundColor: '#212120'}}
                               className="flex-row justify-start">
-                              <View className="p-2 flex rounded-2xl bg-emerald-100 rounded-tl-none">
+                              <View className="p-2 flex rounded-2xl  rounded-tl-none">
                                 <Image
                                   source={{uri: message.content}}
                                   className="rounded-2xl"
@@ -261,10 +275,13 @@ const App = () => {
                           return (
                             <View
                               key={index}
-                              style={{width: wp(70)}}
-                              className="bg-emerald-100 p-2 rounded-xl rounded-tl-none">
+                              style={{
+                                width: wp(70),
+                                backgroundColor: '#212120',
+                              }}
+                              className=" p-2 rounded-xl rounded-tl-none">
                               <Text
-                                className="text-neutral-800"
+                                className="text-neutral-800 text-white"
                                 style={{fontSize: wp(4)}}>
                                 {message.content}
                               </Text>
@@ -286,6 +303,18 @@ const App = () => {
                         );
                       }
                     })}
+                    {loading === true && (
+                      <View
+                        style={{width: wp(15), backgroundColor: '#212120'}}
+                        className=" p-2 rounded-xl rounded-tl-none">
+                        <LottieView
+                          style={{width: '100%', height: 40}}
+                          source={require('../../assets/images/chat_loader.json')}
+                          autoPlay
+                          loop
+                        />
+                      </View>
+                    )}
                   </ScrollView>
                 </View>
               </View>
@@ -295,8 +324,7 @@ const App = () => {
           </ScrollView>
 
           {/* recording, clear and stop buttons */}
-          <View
-            >
+          <View>
             {recording && (
               <LottieView
                 style={{width: '100%', height: 150}}
